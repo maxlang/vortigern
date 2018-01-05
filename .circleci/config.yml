@@ -16,6 +16,9 @@ jobs:
 
     working_directory: ~/repo
 
+    environment:
+      - NODE_ENV: "ci"
+
     steps:
       - checkout
 
@@ -35,8 +38,6 @@ jobs:
         
       # run tests!
       - run: yarn run test-single
-    environment:
-      - NODE_ENV: "ci"
 
 
 
