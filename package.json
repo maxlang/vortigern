@@ -13,7 +13,6 @@
     "start": "node build/server.js",
     "start:prod": "cross-env NODE_ENV=production npm start",
     "test": "karma start config/test/karma.conf.js",
-    "test-single": "karma start config/test/karma.conf.js --single-run",
     "lint": "tslint \"src/**/**.ts*\""
   },
   "author": "Barbar Startup Factory <hey@barbar.com.tr>",

@@ -35,6 +35,8 @@ jobs:
         
       # run tests!
       - run: yarn run test-single
+    environment:
+      - NODE_ENV: "ci"
 
 
 
