@@ -23,7 +23,7 @@ jobs:
       - checkout
       - run:
           name: Install System Dependencies
-          command: apt-get update -qq && apt-get install -y apt-transport-https build-essential postgresql-contrib software-properties-common memcached unzip xvfb
+          command: sudo apt-get update -qq && apt-get install -y apt-transport-https build-essential postgresql-contrib software-properties-common memcached unzip xvfb
 
       - run:
           name: XVFB
