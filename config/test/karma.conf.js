@@ -13,7 +13,7 @@ module.exports = function (config) {
     customLaunchers: {
       FirefoxHeadless: {
         base: 'Firefox',
-        flags: ['--headless']
+        flags: ['-headless']
       }
     },
   
