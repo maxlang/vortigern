@@ -10,6 +10,14 @@ module.exports = function (config) {
 
     browsers: ['PhantomJS'],
 
+    customLaunchers: {
+      FirefoxHeadless: {
+        base: 'Firefox',
+        flags: ['--headless']
+      }
+    },
+  
+
     files: ['../webpack/test.js'],
 
     preprocessors: {
@@ -102,7 +110,7 @@ module.exports = function (config) {
             test: /\.tsx?$/,
             use: {
               loader: 'istanbul-instrumenter-loader',
-              options: {esModules: true},
+              options: { esModules: true },
             },
             include: path.resolve('./src/app'),
             exclude: /node_modules|\.test\.tsx?$/,
@@ -151,7 +159,7 @@ module.exports = function (config) {
   if (process.env.NODE_ENV === 'ci') {
     conf.autoWatch = false;
     conf.singleRun = true;
-    conf.browsers.push('Firefox');
+    conf.browsers.push('FirefoxHeadless');
     conf.coverageIstanbulReporter.reports.push('lcov');
   } else {
     conf.coverageIstanbulReporter.reports.push('html');
