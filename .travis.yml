@@ -7,13 +7,14 @@ env:
   - NODE_ENV=ci
 
 # Waiting on fix: https://github.com/travis-ci/travis-ci/issues/8836
-sudo: required
-dist: trusty
+# sudo: required
+# dist: trusty
 addons:
-    chrome: stable
-before_script:
-    - "sudo chown root /opt/google/chrome/chrome-sandbox"
-    - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
+    # chrome: stable
+    firefox: latest
+# before_script:
+#     - "sudo chown root /opt/google/chrome/chrome-sandbox"
+#     - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
 
 install:
   - npm install
