@@ -159,7 +159,7 @@ module.exports = function (config) {
   if (process.env.NODE_ENV === 'ci') {
     conf.autoWatch = false;
     conf.singleRun = true;
-    conf.browsers.push('FirefoxHeadless');
+    conf.browsers.push('ChromeHeadless');
     conf.coverageIstanbulReporter.reports.push('lcov');
   } else {
     conf.coverageIstanbulReporter.reports.push('html');
