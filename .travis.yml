@@ -3,11 +3,16 @@ language: node_js
 node_js:
   - "node"
 
+env:
+  - NODE_ENV=ci
+
 addons:
   chrome: stable
 
-env:
-  - NODE_ENV=ci
+before_install:
+  - # start your web application and listen on `localhost`
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+
 
 install:
   - npm install
