@@ -1,1 +1,14 @@
-.About {}
+.About {
+  /* background-color: red; */
+}
+
+h1, h2, p {
+  font-family: sans-serif;
+  text-align: center;
+}
+.blah {
+  height: 400px;
+  width: 80%;
+  margin: 0 auto;
+}
+
