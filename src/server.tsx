@@ -23,6 +23,12 @@ const compression = require('compression');
 const Chalk = require('chalk');
 const favicon = require('serve-favicon');
 
+// var logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+
+const api = require('./api');
+
 const app = express();
 
 app.use(compression());
@@ -48,7 +54,14 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(favicon(path.join(__dirname, 'public/favicon.ico')));
 
+// app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+
 app.use('/public', express.static(path.join(__dirname, 'public')));
+
+app.use('/api', api);
 
 app.get('*', (req, res) => {
   const location = req.url;
