@@ -1,5 +1,8 @@
 Circle CI edit
 
+Elasticsearch init for api:
+curl -X PUT localhost:9200/locations -d '{"mappings":{"location":{"properties":{"user":{"type":"string","fields":{"raw":{"type":"string","index":"not_analyzed"}}},"timestamp":{"type":"date"},"recorded":{"type":"date"},"point":{"type":"geo_point"}}}}}'
+
 # Vortigern
 [![Build Status](https://travis-ci.org/barbar/vortigern.svg?branch=master)](https://travis-ci.org/barbar/vortigern)
 [![Dependency Status](https://david-dm.org/barbar/vortigern.svg)]()

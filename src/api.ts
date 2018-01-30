@@ -25,12 +25,12 @@ router.get('/', (_, res) => {
       res.status(500);
       res.send('500 ERROR: Elasticsearch unreachable.');
     } else {
-      res.send(200);
+      res.sendStatus(200);
     }
   });
 });
 
-router.post('/:user/location', (req, res) => {
+router.post('/:user/locations', (req, res) => {
   console.log('doing');
   const user = req.params.user;
   const locations = req.body;
@@ -63,6 +63,62 @@ router.post('/:user/location', (req, res) => {
     refresh: true,
   }, (err) => {
     res.sendStatus(err ? 500 : 200);
+  });
+
+});
+
+router.get('/:user/locations', (req, res) => {
+  const user = req.params.user;
+
+  const body = {
+    query : {
+      constant_score : {
+        filter : {
+          term : {
+            user,
+          },
+        },
+      },
+    },
+  };
+
+  client.search({
+    index: 'locations',
+      type: 'location',
+        body}).then((resp) => {
+      const hits = resp.hits.hits;
+      res.send(hits);
+    }, (err) => {
+      console.trace(err.message);
+    });
+
+});
+
+router.get('/:user/last_location', (req, res) => {
+  const user = req.params.user;
+
+  const body = {
+    query : {
+      constant_score : {
+        filter : {
+          term : {
+            user,
+          },
+        },
+      },
+    },
+    sort: { recorded: { order: 'desc' } },
+  };
+
+  client.search({
+    index: 'locations',
+    type: 'location',
+    body
+  }).then((resp) => {
+    const hits = resp.hits.hits && resp.hits.hits[0];
+    res.send(hits);
+  }, (err) => {
+    console.trace(err.message);
   });
 
 });
