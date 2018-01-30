@@ -80,6 +80,7 @@ router.get('/:user/locations', (req, res) => {
         },
       },
     },
+    sort: { recorded: { order: 'desc' } },
   };
 
   client.search({
@@ -91,35 +92,6 @@ router.get('/:user/locations', (req, res) => {
     }, (err) => {
       console.trace(err.message);
     });
-
-});
-
-router.get('/:user/last_location', (req, res) => {
-  const user = req.params.user;
-
-  const body = {
-    query : {
-      constant_score : {
-        filter : {
-          term : {
-            'usr.raw': user,
-          },
-        },
-      },
-    },
-    sort: { recorded: { order: 'desc' } },
-  };
-
-  client.search({
-    index: 'locations',
-    type: 'location',
-    body
-  }).then((resp) => {
-    const hits = resp.hits.hits && resp.hits.hits[0];
-    res.send(hits);
-  }, (err) => {
-    console.trace(err.message);
-  });
 
 });
 
