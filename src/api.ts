@@ -75,7 +75,7 @@ router.get('/:user/locations', (req, res) => {
       constant_score : {
         filter : {
           term : {
-            user,
+            'user.raw': user, // NOTE: make sure you set up es using the line from the readme
           },
         },
       },
