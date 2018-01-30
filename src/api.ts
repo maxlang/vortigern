@@ -115,8 +115,8 @@ router.get('/users', (_, res) => {
     type: 'location',
     body
   }).then((resp) => {
-    const hits = resp.hits.hits;
-    res.send(hits);
+    const buckets = _.get(resp, "aggregations.group_by_user.buckets");
+    res.send(buckets);
   }, (err) => {
     console.trace(err.message);
     res.sendStatus(err ? 500 : 200);
