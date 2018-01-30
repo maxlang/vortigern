@@ -113,9 +113,11 @@ router.get('/users', (_, res) => {
   client.search({
     index: 'locations',
     type: 'location',
-    body
+    body,
   }).then((resp) => {
-    const buckets = _.get(resp, "aggregations.group_by_user.buckets");
+    console.log('RESP', resp);
+    const buckets = _.get(resp, 'aggregations.group_by_user.buckets');
+    console.log('buckets', buckets);
     res.send(buckets);
   }, (err) => {
     console.trace(err.message);
