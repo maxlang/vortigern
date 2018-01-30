@@ -2,6 +2,7 @@ import * as React from 'react';
 const style = require('./style.css');
 // https://github.com/PaulLeCam/react-leaflet/issues/45
 import {Map, Marker, Popup, TileLayer } from 'react-leaflet-universal';
+import { divIcon } from 'leaflet-headless';
 import { PeopleConnected as People } from './people';
 import { getPeople } from 'modules/people';
 import { asyncConnect } from 'redux-connect';
@@ -18,7 +19,12 @@ import { asyncConnect } from 'redux-connect';
 }])
 class About extends React.Component<any, any> {
   public render() {
-    console.log('blahblah2');
+
+    const icon = divIcon({
+      html: '🔥',
+      className: style.bigIcon,
+      bgPos: [-20, -20],
+    });
 
     const position = [51.505, -0.09];
     return (
@@ -30,7 +36,7 @@ class About extends React.Component<any, any> {
              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
              attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
            />
-          <Marker position={position} icon>
+          <Marker position={position} icon={icon}>
             <Popup>
                <span>A pretty CSS3 popup.<br />Easily customizable.</span>
             </Popup>

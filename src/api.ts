@@ -4,7 +4,7 @@ let router = express.Router();
 
 let elasticsearch = require('elasticsearch');
 let client = new elasticsearch.Client({
-  host: 'localhost:9200',
+  host: 'http://localhost:9200',
   log: 'trace',
 });
 
@@ -80,7 +80,7 @@ router.get('/:user/locations', (req, res) => {
         },
       },
     },
-    sort: { recorded: { order: 'desc' } },
+    sort: { timestamp: { order: 'desc' } },
   };
 
   client.search({
@@ -104,7 +104,11 @@ router.get('/users', (__, res) => {
       group_by_user: {
         terms: {
           field: 'user.raw',
-          size: 100,
+          order : { latest_recorded : 'desc' },
+          size: 100, //TODO: check cardinality first? Filter by nearby users, etc
+        },
+        aggs: {
+          latest_recorded: { max : {field: 'timestamp'}},
         },
       },
     },
