@@ -85,13 +85,42 @@ router.get('/:user/locations', (req, res) => {
 
   client.search({
     index: 'locations',
-      type: 'location',
-        body}).then((resp) => {
-      const hits = resp.hits.hits;
-      res.send(hits);
-    }, (err) => {
-      console.trace(err.message);
-    });
+    type: 'location',
+    body
+  }).then((resp) => {
+    const hits = resp.hits.hits;
+    res.send(hits);
+  }, (err) => {
+    console.trace(err.message);
+    res.sendStatus(err ? 500 : 200);
+  });
+
+});
+
+router.get('/users', (_, res) => {
+  const body = {
+    size: 0,
+    aggs: {
+      group_by_user: {
+        terms: {
+          field: 'user.raw',
+          size: 100,
+        },
+      },
+    },
+  };
+
+  client.search({
+    index: 'locations',
+    type: 'location',
+    body
+  }).then((resp) => {
+    const hits = resp.hits.hits;
+    res.send(hits);
+  }, (err) => {
+    console.trace(err.message);
+    res.sendStatus(err ? 500 : 200);
+  });
 
 });
 
