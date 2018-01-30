@@ -97,7 +97,7 @@ router.get('/:user/locations', (req, res) => {
 
 });
 
-router.get('/users', (_, res) => {
+router.get('/users', (__, res) => {
   const body = {
     size: 0,
     aggs: {
