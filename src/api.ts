@@ -49,7 +49,7 @@ router.post('/:user/locations', (req, res) => {
       accuracy: v.location.coords.accuracy,
       point: {
         lat: v.location.coords.latitude,
-        lon: v.location.coords.longitud,
+        lon: v.location.coords.longitude,
       },
       timestamp: v.location.timestamp,
       recorded: v.date,
