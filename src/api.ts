@@ -51,7 +51,7 @@ router.post('/:user/locations', (req, res) => {
         lat: v.location.coords.latitude,
         lon: v.location.coords.longitude,
       },
-      timestamp: v.location.timestamp,
+      timestamp: Math.floor(v.location.timestamp), // get rid of ts decimal
       recorded: v.date,
     },
   ]).flatten().value();
