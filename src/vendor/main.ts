@@ -6,7 +6,3 @@
  */
 
  require('../../node_modules/leaflet/dist/leaflet.css');
- require('../../node_modules/leaflet/dist/images/layers.png');
- require('../../node_modules/leaflet/dist/images/marker-icon-2x.png');
- require('../../node_modules/leaflet/dist/images/marker-icon.png');
- require('../../node_modules/leaflet/dist/images/marker-shadow.png');

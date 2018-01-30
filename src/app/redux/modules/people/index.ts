@@ -41,7 +41,7 @@ export function getPeople() {
   console.log('called get ppl');
   return (dispatch) => {
     dispatch(peopleRequest());
-    console.log('HEREEE!!');
+    console.log('HEREEE!! test');
     return fetch('https://test.xlang.com/api/users')
       .then((res) => {
         if (res.ok) {
