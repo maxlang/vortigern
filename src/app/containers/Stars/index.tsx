@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { getStars } from 'modules/stars';
 import { IStars, IStarsAction } from 'models/stars';
-const { connect } = require('react-redux');
+// const { connect } = require('react-redux');
 const { asyncConnect } = require('redux-connect');
 const style = require('./style.css');
 
@@ -12,10 +12,12 @@ interface IProps {
 
 @asyncConnect([{
   promise: ({ store: { dispatch } }) => {
+    console.log('u kno u wnat me');
     return dispatch(getStars());
+    // return {};
   },
-}])
-@connect(
+}], // )
+// @connect(
   (state) => ({ stars: state.stars }),
 )
 class Stars extends React.Component<IProps, {}> {
@@ -24,7 +26,7 @@ class Stars extends React.Component<IProps, {}> {
 
     return (
       <div className={style.Stars}>
-        {stars.isFetching ? 'Fetching Stars' : stars.count}
+        sters: {stars.isFetching ? 'Fetching Stars' : stars.count}
       </div>
     );
   }

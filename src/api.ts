@@ -9,14 +9,14 @@ let client = new elasticsearch.Client({
 });
 
 // TODO: make more secure
-router.use((_, res, next) => {
+router.use((__, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
 
 /* GET home page. */
-router.get('/', (_, res) => {
+router.get('/', (__, res) => {
   client.ping({
     // ping usually has a 3000ms timeout
     requestTimeout: 1000,
@@ -86,7 +86,7 @@ router.get('/:user/locations', (req, res) => {
   client.search({
     index: 'locations',
     type: 'location',
-    body
+    body,
   }).then((resp) => {
     const hits = resp.hits.hits;
     res.send(hits);
