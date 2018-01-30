@@ -102,7 +102,7 @@ router.get('/:user/last_location', (req, res) => {
       constant_score : {
         filter : {
           term : {
-            user,
+            'usr.raw': user,
           },
         },
       },
