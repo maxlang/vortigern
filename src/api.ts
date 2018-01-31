@@ -108,7 +108,15 @@ router.get('/users', (__, res) => {
           size: 100, //TODO: check cardinality first? Filter by nearby users, etc
         },
         aggs: {
-          latest_recorded: { max : {field: 'timestamp'}},
+          latest_recorded: {
+            max : {field: 'timestamp'},
+          },
+          last_location: {
+            top_hits: {
+              sort: {timestamp: {order: 'desc'}},
+              size: 1,
+            },
+          },
         },
       },
     },
