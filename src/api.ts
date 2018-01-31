@@ -105,7 +105,7 @@ router.get('/users', (__, res) => {
         terms: {
           field: 'user.raw',
           order : { latest_recorded : 'desc' },
-          size: 100, //TODO: check cardinality first? Filter by nearby users, etc
+          size: 100, // TODO: check cardinality first? Filter by nearby users, etc
         },
         aggs: {
           latest_recorded: {
