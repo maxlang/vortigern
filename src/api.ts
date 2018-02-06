@@ -82,7 +82,7 @@ router.get('/:user/locations', (req, res) => {
         },
       },
     },
-    sort: { timestamp: { order: 'desc' } },
+    sort: [{timestamp: {order: 'desc'}}, {recorded: {order: 'desc'}}],
   };
 
   client.search({
@@ -115,7 +115,7 @@ router.get('/users', (__, res) => {
           },
           last_location: {
             top_hits: {
-              sort: {timestamp: {order: 'desc'}},
+              sort: [{timestamp: {order: 'desc'}}, {recorded: {order: 'desc'}}],
               size: 10,
             },
           },
