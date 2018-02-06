@@ -56,7 +56,7 @@ class About extends React.Component<IProps, any> {
       ageConstant = newestTs - oldestTs;
     }
 
-    return _.map(lastLocations, (location, i) => {
+    return _.reverse(_.map(lastLocations, (location, i) => {
       const lastPosition = location._source.point;
       const position = [lastPosition.lat, lastPosition.lon];
       const firstEmoji = location._source.emoji && _.first(emojiTree(location._source.emoji), {type: 'emoji'});
@@ -73,7 +73,7 @@ class About extends React.Component<IProps, any> {
       console.log('opacity', opacity);
 
       return this.createMarker(position, icon, message, opacity, key + '-' +  i);
-    });
+    }));
   }
 
   private createMarker(position, icon, message, opacity, key) {
