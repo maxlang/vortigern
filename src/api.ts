@@ -44,6 +44,8 @@ router.post('/:user/locations', (req, res) => {
     { index:  { _index: 'locations', _type: 'location'} },
     {
       user,
+      emoji: v.emoji,
+      message: v.message,
       latitude: v.location.coords.latitude,
       longitude: v.location.coords.longitude,
       accuracy: v.location.coords.accuracy,
@@ -114,7 +116,7 @@ router.get('/users', (__, res) => {
           last_location: {
             top_hits: {
               sort: {timestamp: {order: 'desc'}},
-              size: 1,
+              size: 10,
             },
           },
         },
