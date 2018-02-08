@@ -4,7 +4,7 @@ const style = require('./style.css');
 // https://github.com/PaulLeCam/react-leaflet/issues/45
 import {Map, Marker, Popup, TileLayer } from 'react-leaflet-universal';
 import { divIcon } from 'leaflet-headless';
-import { PeopleConnected as People } from './people';
+// import { PeopleConnected as People } from './people';
 import { getPeople } from 'modules/people';
 import { asyncConnect } from 'redux-connect';
 import { IPeople, IPeopleAction } from 'models/people';
@@ -115,7 +115,7 @@ class About extends React.Component<IProps, any> {
     return (
       <div className={style.About}>
         <h4>About</h4>
-        <People/>
+        {/* <People/> */}
         <Map bounds={bounds} className={style.blah}>
           <TileLayer
              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
