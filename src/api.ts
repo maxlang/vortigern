@@ -140,4 +140,163 @@ router.get('/users', (__, res) => {
 
 });
 
+// TODO factor into second file
+
+///// GOOGLE MAPS
+
+let googleMapsClient = require('@google/maps').createClient({
+  key: 'AIzaSyCOQrgqxahfhl7MUBUFPCvxLPo-vrjb9Ig',
+});
+
+// /places?lat={latitude}&lon={longitude}
+router.get('/places', (req, res) => {
+  const lat = req.query.lat;
+  const lon = req.query.lon;
+  const radius = req.query.r && _.string(req.query.r); // precision in meters
+  const query = req.query.q;
+
+  if (query) {
+    googleMapsClient.places({
+      location: [lat, lon],
+      radius: radius || 50,
+      query,
+      type: 'point_of_interest',
+    }, (err, response) => {
+      if (!err) {
+        res.send(response);
+      } else {
+        res.status(500);
+        res.send(err);
+      }
+    });
+  } else {
+    googleMapsClient.placesNearby({
+      location: [lat, lon],
+      radius: radius || 50,
+      type: 'point_of_interest',
+    }, (err, response) => {
+      if (!err) {
+        res.send(response);
+      } else {
+        res.status(500);
+        res.send(err);
+      }
+    });
+  }
+});
+
+const types = [
+'accounting',
+'airport',
+'amusement_park',
+'aquarium',
+'art_gallery',
+'atm',
+'bakery',
+'bank',
+'bar',
+'beauty_salon',
+'bicycle_store',
+'book_store',
+'bowling_alley',
+'bus_station',
+'cafe',
+'campground',
+'car_dealer',
+'car_rental',
+'car_repair',
+'car_wash',
+'casino',
+'cemetery',
+'church',
+'city_hall',
+'clothing_store',
+'convenience_store',
+'courthouse',
+'dentist',
+'department_store',
+'doctor',
+'electrician',
+'electronics_store',
+'embassy',
+'fire_station',
+'florist',
+'funeral_home',
+'furniture_store',
+'gas_station',
+'gym',
+'hair_care',
+'hardware_store',
+'hindu_temple',
+'home_goods_store',
+'hospital',
+'insurance_agency',
+'jewelry_store',
+'laundry',
+'lawyer',
+'library',
+'liquor_store',
+'local_government_office',
+'locksmith',
+'lodging',
+'meal_delivery',
+'meal_takeaway',
+'mosque',
+'movie_rental',
+'movie_theater',
+'moving_company',
+'museum',
+'night_club',
+'painter',
+'park',
+'parking',
+'pet_store',
+'pharmacy',
+'physiotherapist',
+'plumber',
+'police',
+'post_office',
+'real_estate_agency',
+'restaurant',
+'roofing_contractor',
+'rv_park',
+'school',
+'shoe_store',
+'shopping_mall',
+'spa',
+'stadium',
+'storage',
+'store',
+'subway_station',
+'supermarket',
+'synagogue',
+'taxi_stand',
+'train_station',
+'transit_station',
+'travel_agency',
+'veterinary_care',
+'zoo',
+];
+
+// https://developers.google.com/places/web-service/supported_types
+// /places?lat={latitude}&lon={longitude}
+router.get('/closest', (req, res) => {
+  const lat = req.query.lat;
+  const lon = req.query.lon;
+
+  googleMapsClient.placesNearby({
+    location: [lat, lon],
+    rankby: 'distance',
+    type: types.join(','),
+  }, (err, response) => {
+    if (!err) {
+      res.send(response);
+    } else {
+      res.status(500);
+      res.send(err);
+    }
+  });
+
+});
+
 module.exports = router;
