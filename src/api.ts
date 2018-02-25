@@ -209,7 +209,7 @@ router.get('/users', (__, res) => {
 ///// GOOGLE MAPS
 
 let googleMapsClient = require('@google/maps').createClient({
-  key: 'AIzaSyCOQrgqxahfhl7MUBUFPCvxLPo-vrjb9Ig',
+  key: process.env.GOOGLE_API_KEY,
 });
 
 // /places?lat={latitude}&lon={longitude}
