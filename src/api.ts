@@ -69,6 +69,70 @@ router.post('/:user/locations', (req, res) => {
 
 });
 
+// DEFAULT BG LOCATION POST TEMPLATE
+// postTemplate={
+//   accuracy = "@accuracy";
+//   altitude = "@altitude";
+//   altitudeAccuracy = "@altitudeAccuracy";
+//   bearing = "@bearing";
+//   latitude = "@latitude";
+//   locationProvider = "@locationProvider";
+//   longitude = "@longitude";
+//   provider = provider;
+//   radius = "@radius";
+//   speed = "@speed";
+//   time = "@time";
+// }
+
+// TODO: add user, message, emoji
+
+// TODO: CORRECTLY ADD SECURITY - USE AUTH TOKEN
+
+router.post('/:user/locations', (req, res) => {
+  console.log('doing');
+  const user = req.params.user;
+  const locations = req.body;
+  // locations = JSON.parse(locations);
+  console.log('REQ BODY', req.body);
+
+  // tslint:disable-next-line
+  // locations = [{"location":{"mocked":false,"timestamp":1509403057000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.41199833333334}},"date":1509403117216},{"location":{"mocked":false,"timestamp":1509403128000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.41199833333334}},"date":1509403128431},{"location":{"mocked":false,"timestamp":1509403141000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.421998333333335}},"date":1509403141112},{"location":{"mocked":false,"timestamp":1509403196000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1509403196659},{"location":{"mocked":false,"timestamp":1509403196000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1509403288989},{"location":{"mocked":false,"timestamp":1510177626000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1510177626985},{"location":{"mocked":false,"timestamp":1510177643000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1510177669194},{"location":{"mocked":false,"timestamp":1510177643000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1510177737117},{"location":{"mocked":false,"timestamp":1510177643000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1510177745924}]
+
+  const missingUser = _.find(locations, (l) => !l);
+  if (missingUser) {
+    res.status(500);
+    return res.send('Found location missing user', missingUser);
+  }
+
+  const body = _(locations).reject({location: null}).map((v) => [
+    { index:  { _index: 'locations', _type: 'location'} },
+    {
+      user,
+      emoji: v.emoji,
+      message: v.message,
+      latitude: v.location.coords.latitude,
+      longitude: v.location.coords.longitude,
+      accuracy: v.location.coords.accuracy,
+      point: {
+        lat: v.location.coords.latitude,
+        lon: v.location.coords.longitude,
+      },
+      timestamp: Math.floor(v.location.timestamp), // get rid of ts decimal
+      recorded: v.date,
+    },
+  ]).flatten().value();
+
+  console.log('BULK REQ BODY', body);
+
+  client.bulk({
+    body,
+    refresh: true,
+  }, (err) => {
+    res.sendStatus(err ? 500 : 200);
+  });
+
+});
+
 router.get('/:user/locations', (req, res) => {
   const user = req.params.user;
 
@@ -283,11 +347,32 @@ const types = [
 router.get('/closest', (req, res) => {
   const lat = req.query.lat;
   const lon = req.query.lon;
+  const type = req.query.type || 'point_of_interest';
 
   googleMapsClient.placesNearby({
     location: [lat, lon],
     rankby: 'distance',
-    type: types.join(','),
+    type,
+  }, (err, response) => {
+    if (!err) {
+      res.send(response);
+    } else {
+      res.status(500);
+      res.send(err);
+    }
+  });
+
+});
+
+router.get('/types', (__, res) => {
+  res.send(types);
+});
+
+router.get('/details', (req, res) => {
+  const placeid = req.query.id;
+
+  googleMapsClient.place({
+    placeid,
   }, (err, response) => {
     if (!err) {
       res.send(response);
