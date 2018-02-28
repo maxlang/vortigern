@@ -1,9 +1,10 @@
-let express = require('express');
-let _ = require('lodash');
-let router = express.Router();
+import * as moment from 'moment';
+const express = require('express');
+const _ = require('lodash');
+const router = express.Router();
 
-let elasticsearch = require('elasticsearch');
-let client = new elasticsearch.Client({
+const elasticsearch = require('elasticsearch');
+const client = new elasticsearch.Client({
   host: 'http://localhost:9200',
   log: 'trace',
 });
@@ -205,11 +206,34 @@ router.get('/users', (__, res) => {
 
 });
 
+router.get('/emojis', (__, res) => {
+  const body = {
+    size: 0,
+    filter: {
+      range: { timestamp: { gte: moment().subtract(1, 'hour').toISOString() } },
+    },
+    sort: [{timestamp: {order: 'desc'}}, {recorded: {order: 'desc'}}],
+  };
+
+  client.search({
+    index: 'emojis',
+    type: 'location',
+    body,
+  }).then((resp) => {
+    const hits = resp.hits.hits;
+    res.send(hits);
+  }, (err) => {
+    console.trace(err.message);
+    res.sendStatus(err ? 500 : 200);
+  });
+
+});
+
 // TODO factor into second file
 
 ///// GOOGLE MAPS
 
-let googleMapsClient = require('@google/maps').createClient({
+const googleMapsClient = require('@google/maps').createClient({
   key: process.env.GOOGLE_API_KEY,
 });
 
