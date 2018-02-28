@@ -10,7 +10,7 @@ import { asyncConnect } from 'redux-connect';
 import { IPeople, IPeopleAction } from 'models/people';
 // import { connect } from 'react-redux';
 
-import * as moment from 'moment';
+// import * as moment from 'moment';
 
 const emojiTree = require('emoji-tree');
 
