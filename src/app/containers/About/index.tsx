@@ -76,7 +76,7 @@ class About extends React.Component<IProps, any> {
     //   return this.createMarker(position, icon, message, opacity, key + '-' +  i);
     // }));
 
-    const lastPosition = lastLocations[0].location._source.point;
+    const lastPosition = lastLocations[0]._source.point;
     const position = [lastPosition.lat, lastPosition.lon];
     const firstEmoji = lastLocations[0]._source.emoji &&
       _.first(emojiTree(lastLocations[0]._source.emoji), {type: 'emoji'});
