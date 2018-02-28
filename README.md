@@ -3,6 +3,9 @@ Circle CI edit
 Elasticsearch init for api:
 curl -X PUT localhost:9200/locations -d '{"mappings":{"location":{"properties":{"user":{"type":"string","fields":{"raw":{"type":"string","index":"not_analyzed"}}},"timestamp":{"type":"date"},"recorded":{"type":"date"},"point":{"type":"geo_point"}}}}}'
 
+curl -X PUT localhost:9200/emojis -d '{"mappings":{"location":{"properties":{"user":{"type":"string","fields":{"raw":{"type":"string","index":"not_analyzed"}}},"timestamp":{"type":"date"},"recorded":{"type":"date"},"point":{"type":"geo_point"}}}}}'
+
+
 https://github.com/Automattic/node-canvas/issues/958
 
 # Vortigern
