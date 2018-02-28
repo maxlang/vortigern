@@ -208,7 +208,7 @@ router.get('/users', (__, res) => {
 
 router.get('/emojis', (__, res) => {
   const body = {
-    size: 0,
+    size: 1000,
     filter: {
       range: { timestamp: { gte: moment().subtract(1, 'hour').toISOString() } },
     },
