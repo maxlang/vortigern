@@ -11,20 +11,27 @@ import { IPeople, IPeopleAction } from 'models/people';
 // import { connect } from 'react-redux';
 
 // import * as moment from 'moment';
+import { emojisAction } from 'redux/modules/emojis';
 
 const emojiTree = require('emoji-tree');
 
 interface IProps {
   people: IPeople;
   getPeople: Redux.ActionCreator<IPeopleAction>;
+  emojis: any;
 }
 
 @asyncConnect([{
   promise: ({ store: { dispatch } }) => {
     return dispatch(getPeople());
   },
+},
+{
+  promise: ({ store: { dispatch } }) => {
+    return dispatch(emojisAction());
+  },
 }],
-(state) => ({ people: state.people}))
+(state) => ({ people: state.people, emojis: state.emojis }))
 class About extends React.Component<IProps, any> {
 
   // private king = divIcon({
@@ -104,7 +111,9 @@ class About extends React.Component<IProps, any> {
   }
 
   public render() {
-    const { people } = this.props;
+    const { people, emojis } = this.props;
+
+    console.log('EMOJIS', emojis);
 
     // const max = _.find(people.people, (v) => v.key.startsWith('max'));
     // const sharon = _.find(people.people, (v) => v.key.startsWith('sharon'));
