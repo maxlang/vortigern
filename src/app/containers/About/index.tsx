@@ -43,37 +43,47 @@ class About extends React.Component<IProps, any> {
 
   private createPersonMarkers(person, key) {
     const lastLocations = _.get(person, 'last_location.hits.hits', []);
-    let ageConstant = 1;
-    let oldestTs = lastLocations[0] && lastLocations[0].timestamp || 0;
-    const newestTs = moment().valueOf();
+    // let ageConstant = 1;
+    // let oldestTs = lastLocations[0] && lastLocations[0].timestamp || 0;
+    // const newestTs = moment().valueOf();
 
     console.log(lastLocations);
 
-    if (lastLocations.length >= 2) {
-      oldestTs = _.minBy(lastLocations, (l) => {console.log('lll', l); return l._source.timestamp; })._source.timestamp;
-      console.log('oldestTS', oldestTs);
-      // newestTs = _.maxBy(lastLocations, (l) => l._source.timestamp)._source.timestamp;
-      ageConstant = newestTs - oldestTs;
-    }
+    // if (lastLocations.length >= 2) {
+    // tslint:disable-next-line:max-line-length
+    //   oldestTs = _.minBy(lastLocations, (l) => {console.log('lll', l); return l._source.timestamp; })._source.timestamp;
+    //   console.log('oldestTS', oldestTs);
+    //   // newestTs = _.maxBy(lastLocations, (l) => l._source.timestamp)._source.timestamp;
+    //   ageConstant = newestTs - oldestTs;
+    // }
 
-    return _.reverse(_.map(lastLocations, (location, i) => {
-      const lastPosition = location._source.point;
-      const position = [lastPosition.lat, lastPosition.lon];
-      const firstEmoji = location._source.emoji && _.first(emojiTree(location._source.emoji), {type: 'emoji'});
-      const icon = firstEmoji && firstEmoji.text || '';
-      const message = location._source.message || '';
-      const age = newestTs - location._source.timestamp;
-      const opacity = age / ageConstant;
-      console.log('DEBBUGGING');
-      console.log('ts', location._source.timestamp);
-      console.log('oldest', oldestTs);
-      console.log('newest', newestTs);
-      console.log('age', age);
-      console.log('ageConstant', ageConstant);
-      console.log('opacity', opacity);
+    // return _.reverse(_.map(lastLocations, (location, i) => {
+    //   const lastPosition = location._source.point;
+    //   const position = [lastPosition.lat, lastPosition.lon];
+    //   const firstEmoji = location._source.emoji && _.first(emojiTree(location._source.emoji), {type: 'emoji'});
+    //   const icon = firstEmoji && firstEmoji.text || '';
+    //   const message = location._source.message || '';
+    //   const age = newestTs - location._source.timestamp;
+    //   const opacity = age / ageConstant;
+    //   console.log('DEBBUGGING');
+    //   console.log('ts', location._source.timestamp);
+    //   console.log('oldest', oldestTs);
+    //   console.log('newest', newestTs);
+    //   console.log('age', age);
+    //   console.log('ageConstant', ageConstant);
+    //   console.log('opacity', opacity);
 
-      return this.createMarker(position, icon, message, opacity, key + '-' +  i);
-    }));
+    //   return this.createMarker(position, icon, message, opacity, key + '-' +  i);
+    // }));
+
+    const lastPosition = lastLocations[0].location._source.point;
+    const position = [lastPosition.lat, lastPosition.lon];
+    const firstEmoji = lastLocations[0]._source.emoji &&
+      _.first(emojiTree(lastLocations[0]._source.emoji), {type: 'emoji'});
+    const icon = firstEmoji && firstEmoji.text || '🙂';
+    const message = lastLocations[0]._source.message || 'hi!';
+
+    return this.createMarker(position, icon, message, 1, key);
   }
 
   private createMarker(position, icon, message, opacity, key) {
