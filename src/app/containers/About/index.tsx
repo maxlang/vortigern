@@ -7,8 +7,8 @@ import { divIcon } from 'leaflet-headless';
 // import { PeopleConnected as People } from './people';
 import { getPeople } from 'modules/people';
 import { asyncConnect } from 'redux-connect';
-import { IPeople, IPeopleAction } from 'models/people';
-// import { connect } from 'react-redux';
+import { IPeople } from 'models/people';
+import { connect } from 'react-redux';
 
 // import * as moment from 'moment';
 import { emojisAction } from 'redux/modules/emojis';
@@ -17,7 +17,9 @@ const emojiTree = require('emoji-tree');
 
 interface IProps {
   people: IPeople;
-  getPeople: Redux.ActionCreator<IPeopleAction>;
+  // getPeople: Redux.ActionCreator<IPeopleAction>;
+  getPeople: typeof getPeople;
+  emojisAction: typeof emojisAction;
   emojis: any;
 }
 
@@ -30,8 +32,7 @@ interface IProps {
   promise: ({ store: { dispatch } }) => {
     return dispatch(emojisAction());
   },
-}],
-(state) => ({ people: state.people, emojis: state.emojis }))
+}])
 class About extends React.Component<IProps, any> {
 
   // private king = divIcon({
@@ -47,6 +48,47 @@ class About extends React.Component<IProps, any> {
   //   // iconSize: [40, 40],
   //   iconAnchor: [20, 30],
   // });
+
+  private etimer;
+  private ptimer;
+
+  public componentWillMount() {
+    if (this.etimer) {
+      try {
+        clearInterval(this.etimer);
+      } catch (e) {
+        console.log('error clearing interval', e);
+      }
+    }
+    this.etimer = setInterval(this.props.emojisAction, 1000); // TODO: don't refresh every second
+
+    if (this.ptimer) {
+      try {
+        clearInterval(this.ptimer);
+      } catch (e) {
+        console.log('error clearing interval', e);
+      }
+    }
+    this.ptimer = setInterval(this.props.getPeople, 1000); // TODO: don't refresh every second
+
+  }
+
+  public componentWillUnmount() {
+    if (this.etimer) {
+      try {
+        clearInterval(this.etimer);
+      } catch (e) {
+        console.log('error clearing interval', e);
+      }
+    }
+    if (this.ptimer) {
+      try {
+        clearInterval(this.ptimer);
+      } catch (e) {
+        console.log('error clearing interval', e);
+      }
+    }
+  }
 
   private createPersonMarkers(person, key) {
     const lastLocations = _.get(person, 'last_location.hits.hits', []);
@@ -113,7 +155,7 @@ class About extends React.Component<IProps, any> {
   public render() {
     const { people, emojis } = this.props;
 
-    console.log('EMOJIS', emojis);
+    // console.log('EMOJIS', emojis);
 
     // const max = _.find(people.people, (v) => v.key.startsWith('max'));
     // const sharon = _.find(people.people, (v) => v.key.startsWith('sharon'));
@@ -126,10 +168,24 @@ class About extends React.Component<IProps, any> {
     const lat = 'last_location.hits.hits[0]._source.point.lat';
     const lon = 'last_location.hits.hits[0]._source.point.lon';
 
+    people.people = _.reject(people.people,
+      (p) => _.get(p, 'last_location.hits.hits[0]._source.user') === 'sharon.e.lee@gmail.com',
+    );
+
+    // TODO: include emoji in bounds
     const bounds = [
       [_.get(_.minBy(people.people, lat), lat), _.get(_.minBy(people.people, lon), lon)],
       [_.get(_.maxBy(people.people, lat), lat), _.get(_.maxBy(people.people, lon), lon)],
     ];
+
+    const emojiMarkers = _.map(emojis.data,
+      (e, i) => (
+        <Marker
+          position={[e._source.point.lat, e._source.point.lon]}
+          icon={divIcon({html: e._source.emoji, className: style.bigIcon, iconAnchor: [20, 30]})}
+          key={i} />
+        ),
+      );
 
     return (
       <div className={style.About}>
@@ -141,13 +197,22 @@ class About extends React.Component<IProps, any> {
              attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
            />
            {_.flatten(_.map(people.people, (person, i) => this.createPersonMarkers(person, i)))}
+           {emojiMarkers}
         </Map>
       </div>
     );
   }
 }
 
-export { About }
+const AboutConnected = connect(
+  (state) => ({ people: state.people, emojis: state.emojis }),
+  {
+    getPeople,
+    emojisAction,
+  },
+)(About);
+
+export { AboutConnected }
 
 // tslint:disable-next-line
 // [ { "key": "maxwell.g.lang@gmail.com", "doc_count": 18, "last_location": { "hits": { "total": 18, "max_score": null, "hits": [ { "_index": "locations", "_type": "location", "_id": "AWFJh9s858UbSp3UoN8n", "_score": null, "_source": { "user": "maxwell.g.lang@gmail.com", "latitude": 37.33056973, "longitude": -122.0288791, "accuracy": 10, "point": { "lat": 37.33056973, "lon": -122.0288791 }, "timestamp": 1517357095694, "recorded": 1517357095701 }, "sort": [ 1517357095694 ] } ] } }, "latest_recorded": { "value": 1517357095694, "value_as_string": "2018-01-31T00:04:55.694Z" } }, { "key": "sharon.e.lee@gmail.com", "doc_count": 14, "last_location": { "hits": { "total": 14, "max_score": null, "hits": [ { "_index": "locations", "_type": "location", "_id": "AWFFb3ZX58UbSp3UoN8P", "_score": null, "_source": { "user": "sharon.e.lee@gmail.com", "latitude": 40.7483, "longitude": -73.9846, "accuracy": 20, "point": { "lat": 40.7483, "lon": -73.9846 }, "timestamp": 1517201988000, "recorded": 1517288388062 }, "sort": [ 1517201988000 ] } ] } }, "latest_recorded": { "value": 1517201988000, "value_as_string": "2018-01-29T04:59:48.000Z" } } ]

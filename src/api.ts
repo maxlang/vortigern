@@ -206,6 +206,7 @@ router.get('/users', (__, res) => {
 
 });
 
+// TODO: figure out what to do if someone registers an emoji with a stale location timestamp
 router.get('/emojis', (__, res) => {
   const body = {
     size: 1000,

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { renderComponent } from 'helpers/TestHelper';
-import { About } from './index';
+import { AboutConnected as About } from './index';
 
 describe('<About />', () => {
 
