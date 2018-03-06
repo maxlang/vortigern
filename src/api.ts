@@ -2,6 +2,7 @@ import * as moment from 'moment';
 const express = require('express');
 const _ = require('lodash');
 const router = express.Router();
+import { getDistanceSimple } from 'geolib';
 
 const elasticsearch = require('elasticsearch');
 const client = new elasticsearch.Client({
@@ -242,15 +243,14 @@ const googleMapsClient = require('@google/maps').createClient({
 router.get('/places', (req, res) => {
   const lat = req.query.lat;
   const lon = req.query.lon;
-  const radius = req.query.r && _.string(req.query.r); // precision in meters
+  const radius = req.query.r && _.isString(req.query.r) && parseInt(req.query.r, 10) || 100; // precision in meters
   const query = req.query.q;
 
   if (query) {
     googleMapsClient.places({
       location: [lat, lon],
-      radius: radius || 50,
+      radius,
       query,
-      type: 'point_of_interest',
     }, (err, response) => {
       if (!err) {
         res.send(response);
@@ -262,8 +262,8 @@ router.get('/places', (req, res) => {
   } else {
     googleMapsClient.placesNearby({
       location: [lat, lon],
-      radius: radius || 50,
-      type: 'point_of_interest',
+      radius,
+      // type: 'point_of_interest',
     }, (err, response) => {
       if (!err) {
         res.send(response);
@@ -371,25 +371,114 @@ const types = [
 // TODO: handle multiple types
 
 // https://developers.google.com/places/web-service/supported_types
-// /places?lat={latitude}&lon={longitude}
+// /closest?lat={latitude}&lon={longitude}
 router.get('/closest', (req, res) => {
   const lat = req.query.lat;
   const lon = req.query.lon;
   const type = req.query.type || 'point_of_interest';
 
-  googleMapsClient.placesNearby({
+  if (_.isArray(type)) {
+    Promise.all(_.map(type, (t) => new Promise((resolve, reject) => googleMapsClient.placesNearby({
+        location: [lat, lon],
+        rankby: 'distance',
+        type: t,
+      }, (err, response) => {
+        if (!err) {
+          resolve(response);
+        } else {
+          reject(err);
+        }
+      })))).then((results) => res.send(results))
+      .catch((err) => {
+        res.status(500);
+        res.send(err);
+      });
+  } else {
+    googleMapsClient.placesNearby({
+      location: [lat, lon],
+      rankby: 'distance',
+      type,
+    }, (err, response) => {
+      if (!err) {
+        res.send(response);
+      } else {
+        res.status(500);
+        res.send(err);
+      }
+    });
+  }
+});
+
+function handleResults(resultResponses, pos) {
+  try {
+    console.log(getDistanceSimple(pos, resultResponses[0].json.results[0].geometry.location));
+    const htmlAttributions = _.flatMap(resultResponses, (r) => r.json.html_attributions);
+    const results = _(resultResponses)
+      .flatMap((r) => r.json.results)
+      .map((r) => _.assign(r, {
+        distance: getDistanceSimple(pos, r.geometry.location),
+        location: r.geometry.location,
+        // TODO: less primacy to hospitols, accountants, etc
+        // TODO: eventually we woudl weight based on how often people pick a place and distance
+        // TODO: filter out administrative ones? or locality?
+        score: getDistanceSimple(pos, r.geometry.location) + 60 -
+         (r.rating ? r.rating * 4 : - 10) -
+         (_.intersection(r.types, ['bar', 'night_club', 'restaurant', 'cafe']).length * 10),
+      }))
+      .filter((r) => r.score < 300)
+      .orderBy(['score', 'distance'], ['asc', 'asc'])
+      .uniqBy('id')
+      .map((r) => _.pick(r, ['location', 'distance', 'score', 'id', 'place_id', 'name', 'rating', 'types', 'vicinity']))
+      .value();
+
+    return {
+      htmlAttributions,
+      results,
+      // raw: resultResponses,
+    };
+  } catch (e) {
+    console.log('ERROR processing results: ', e);
+    return { raw: resultResponses }
+  }
+}
+
+router.get('/locationSuggestions', (req, res) => {
+  const lat = req.query.lat;
+  const lon = req.query.lon;
+  const likelyTypes = [
+  'bar',
+  'cafe',
+  'night_club',
+  'restaurant',
+  'store',
+];
+
+  const prominentNearby = new Promise ((resolve, reject) => googleMapsClient.placesNearby({
     location: [lat, lon],
-    rankby: 'distance',
-    type,
+    radius: 100,
   }, (err, response) => {
     if (!err) {
-      res.send(response);
+      resolve(response);
     } else {
+      reject(err);
+    }
+  }));
+
+  Promise.all(_.map(likelyTypes, (type) => new Promise((resolve, reject) => googleMapsClient.placesNearby({
+      location: [lat, lon],
+      rankby: 'distance',
+      type,
+    }, (err, response) => {
+      if (!err) {
+        resolve(response);
+      } else {
+        reject(err);
+      }
+    }))).concat(prominentNearby)).then((results) => res.send(handleResults(results, {latitude: lat, longitude: lon})))
+    .catch((err) => {
       res.status(500);
       res.send(err);
-    }
-  });
-
+    });
 });
 
 router.get('/types', (__, res) => {
