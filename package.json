@@ -148,6 +148,7 @@
     "enzyme-adapter-react-16": "^1.1.1",
     "es6-promise": "^4.0.5",
     "express": "^4.14.0",
+    "express-ws": "^3.0.0",
     "geolib": "^2.0.24",
     "history": "^4.5.1",
     "isomorphic-fetch": "^2.2.1",
@@ -173,6 +174,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0",
     "serialize-javascript": "1.4.0",
-    "serve-favicon": "^2.3.2"
+    "serve-favicon": "^2.3.2",
+    "ws": "^5.0.0"
   }
 }

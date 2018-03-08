@@ -17,6 +17,70 @@ router.use((__, res, next) => {
   next();
 });
 
+const tracking = [];
+
+function broadcastLocations(locationIndexPairs) {
+  // Take the most recent location for the user and take every emoji location
+  const userLocations = _.filter(locationIndexPairs, (lip) => lip[0].index._index === 'locations');
+
+  const userLocation = _.maxBy(userLocations, (lip) => lip[1].timestamp)[1];
+
+  const emojiLocations = _.filter(locationIndexPairs, (lip) => lip[0].index._index === 'emojis');
+
+  const locations = _.map(emojiLocations, (v) => v[1]).concat(userLocation);
+
+  _.each(tracking, (ws) => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(locations);
+    } else {
+      // remove stale clients
+      tracking.splice(_.indexsOf(tracking, ws), 1);
+    }
+  });
+}
+
+// TODO: send your current location to track and only track emoji/locations nearby
+router.ws('/track', (ws) => {
+  tracking.push(ws);
+  const body = {
+    size: 0,
+    aggs: {
+      group_by_user: {
+        terms: {
+          field: 'user.raw',
+          order : { latest_recorded : 'desc' },
+          size: 100, // TODO: check cardinality first? Filter by nearby users, etc
+        },
+        aggs: {
+          latest_recorded: {
+            max : {field: 'timestamp'},
+          },
+          last_location: {
+            top_hits: {
+              sort: [{timestamp: {order: 'desc'}}, {recorded: {order: 'desc'}}],
+              size: 10,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  client.search({
+    index: 'locations',
+    type: 'location',
+    body,
+  }).then((resp) => {
+    console.log('RESP', resp);
+    const buckets = _.get(resp, 'aggregations.group_by_user.buckets');
+    console.log('buckets', buckets);
+    ws.send(buckets);
+  }, (err) => {
+    console.trace(err.message);
+    ws.close(1011, 'Unable to retreive locations');
+  });
+});
+
 /* GET home page. */
 router.get('/', (__, res) => {
   client.ping({
@@ -42,6 +106,8 @@ router.post('/:user/locations', (req, res) => {
   // tslint:disable-next-line
   // locations = [{"location":{"mocked":false,"timestamp":1509403057000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.41199833333334}},"date":1509403117216},{"location":{"mocked":false,"timestamp":1509403128000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.41199833333334}},"date":1509403128431},{"location":{"mocked":false,"timestamp":1509403141000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.421998333333335}},"date":1509403141112},{"location":{"mocked":false,"timestamp":1509403196000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1509403196659},{"location":{"mocked":false,"timestamp":1509403196000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1509403288989},{"location":{"mocked":false,"timestamp":1510177626000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1510177626985},{"location":{"mocked":false,"timestamp":1510177643000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1510177669194},{"location":{"mocked":false,"timestamp":1510177643000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1510177737117},{"location":{"mocked":false,"timestamp":1510177643000,"coords":{"speed":0,"heading":0,"accuracy":20,"longitude":-122.08400000000002,"altitude":0,"latitude":37.43299833333333}},"date":1510177745924}]
 
+  let storeForBroadcast;
+
   const body = _(locations).reject({location: null}).map((v) => [
     { index:  { _index: (v.type === 'emoji' ? 'emojis' : 'locations'), _type: 'location'} },
     {
@@ -58,15 +124,18 @@ router.post('/:user/locations', (req, res) => {
       timestamp: Math.floor(v.location.timestamp), // get rid of ts decimal
       recorded: v.date,
     },
-  ]).flatten().value();
+  ]).tap((locationIndexPairs) => storeForBroadcast = locationIndexPairs).flatten().value();
 
   console.log('BULK REQ BODY', body);
 
   client.bulk({
     body,
-    refresh: true, // TODO: remove for perf - figure out how to get this working
+    refresh: true, // TODO: don't use refresh true for perf - figure out how to get this working
   }, (err) => {
     // TODO: also check the response status, can return no error but the request itself might have an error
+    if (!err) {
+      broadcastLocations(storeForBroadcast);
+    }
     res.sendStatus(err ? 500 : 200);
   });
 

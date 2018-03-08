@@ -1,5 +1,9 @@
 const appConfig = require('../config/main');
 
+const express = require('express');
+const app = express();
+require('express-ws')(app);
+
 import * as e6p from 'es6-promise';
 (e6p as any).polyfill();
 import 'isomorphic-fetch';
@@ -17,7 +21,6 @@ import routes from './app/routes';
 import { Html } from './app/containers';
 const manifest = require('../build/manifest.json');
 
-const express = require('express');
 const path = require('path');
 const compression = require('compression');
 const Chalk = require('chalk');
@@ -28,8 +31,6 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
 const api = require('./api');
-
-const app = express();
 
 app.use(compression());
 
