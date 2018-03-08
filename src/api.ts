@@ -3,6 +3,7 @@ const express = require('express');
 const _ = require('lodash');
 const router = express.Router();
 import { getDistanceSimple } from 'geolib';
+const WebSocket = require('ws');
 
 const elasticsearch = require('elasticsearch');
 const client = new elasticsearch.Client({
