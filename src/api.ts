@@ -23,11 +23,15 @@ function broadcastLocations(locationIndexPairs) {
   // Take the most recent location for the user and take every emoji location
   const userLocations = _.filter(locationIndexPairs, (lip) => lip[0].index._index === 'locations');
 
-  const userLocation = _.maxBy(userLocations, (lip) => lip[1].timestamp)[1];
-
   const emojiLocations = _.filter(locationIndexPairs, (lip) => lip[0].index._index === 'emojis');
 
-  const locations = _.map(emojiLocations, (v) => v[1]).concat(userLocation);
+  const locations = _.map(emojiLocations, (v) => v[1]);
+
+  // TODO: more sophisticated "lasted user position" possibly?
+  if (userLocations.length) {
+    const userLocation = _.maxBy(userLocations, (lip) => lip[1].timestamp)[1];
+    locations.concat(userLocation);
+  }
 
   _.each(tracking, (ws) => {
     if (ws.readyState === WebSocket.OPEN) {
