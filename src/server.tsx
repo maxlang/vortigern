@@ -2,7 +2,7 @@ const appConfig = require('../config/main');
 
 const express = require('express');
 const app = express();
-require('express-ws')(app);
+const proxy = require('http-proxy-middleware');
 
 import * as e6p from 'es6-promise';
 (e6p as any).polyfill();
@@ -30,7 +30,23 @@ const favicon = require('serve-favicon');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
-const api = require('./api');
+// proxy middleware options
+const proxyOptions = {
+  target: 'localhost:8898', // target host
+  changeOrigin: true,               // needed for virtual hosted sites
+  ws: true,                         // proxy websockets
+  pathRewrite: {
+      // '^/api/old-path' : '/api/new-path',     // rewrite path
+      // '^/api/remove/path' : '/path'           // remove base path
+  },
+  router: {
+      // when request.headers.host == 'dev.localhost:3000',
+      // override target 'http://www.example.org' to 'http://localhost:8000'
+      // 'dev.localhost:3000' : 'http://localhost:8000'
+  },
+};
+
+const apiProxy = proxy(proxyOptions);
 
 app.use(compression());
 
@@ -62,7 +78,7 @@ app.use(cookieParser());
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-app.use('/api', api);
+app.use('/api', apiProxy);
 
 app.get('*', (req, res) => {
   const location = req.url;

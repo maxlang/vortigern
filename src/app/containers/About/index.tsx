@@ -49,45 +49,20 @@ class About extends React.Component<IProps, any> {
   //   iconAnchor: [20, 30],
   // });
 
-  private etimer;
-  private ptimer;
+  private socket;
 
   public componentWillMount() {
-    if (this.etimer) {
-      try {
-        clearInterval(this.etimer);
-      } catch (e) {
-        console.log('error clearing interval', e);
-      }
-    }
-    this.etimer = setInterval(this.props.emojisAction, 1000); // TODO: don't refresh every second
+    // Create WebSocket connection.
+    this.socket = new WebSocket('wss://test.xlang.com/api/track');
 
-    if (this.ptimer) {
-      try {
-        clearInterval(this.ptimer);
-      } catch (e) {
-        console.log('error clearing interval', e);
-      }
-    }
-    this.ptimer = setInterval(this.props.getPeople, 1000); // TODO: don't refresh every second
-
+    // Listen for messages
+    this.socket.addEventListener('message', (event) => {
+        console.log('Message from server ', JSON.parse(event.data));
+    });
   }
 
   public componentWillUnmount() {
-    if (this.etimer) {
-      try {
-        clearInterval(this.etimer);
-      } catch (e) {
-        console.log('error clearing interval', e);
-      }
-    }
-    if (this.ptimer) {
-      try {
-        clearInterval(this.ptimer);
-      } catch (e) {
-        console.log('error clearing interval', e);
-      }
-    }
+    this.socket.close();
   }
 
   private createPersonMarkers(person, key) {

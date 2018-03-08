@@ -23,7 +23,7 @@ var config = {
     modules: [path.resolve(__dirname), 'node_modules', 'app', 'app/redux'],
   },
 
-  entry: './src/server.tsx',
+  entry: ['babel-polyfill', './src/server.tsx'],
 
   output: {
     path: path.resolve('./build/public'),
