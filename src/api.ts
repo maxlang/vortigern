@@ -31,7 +31,7 @@ function broadcastLocations(locationIndexPairs) {
 
   _.each(tracking, (ws) => {
     if (ws.readyState === WebSocket.OPEN) {
-      ws.send(locations);
+      ws.send(JSON.stringify(locations));
     } else {
       // remove stale clients
       tracking.splice(_.indexsOf(tracking, ws), 1);
@@ -74,7 +74,7 @@ router.ws('/track', (ws) => {
     console.log('RESP', resp);
     const buckets = _.get(resp, 'aggregations.group_by_user.buckets');
     console.log('buckets', buckets);
-    ws.send(buckets);
+    ws.send(JSON.stringify(buckets));
   }, (err) => {
     console.trace(err.message);
     ws.close(1011, 'Unable to retreive locations');
