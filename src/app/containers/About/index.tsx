@@ -9,10 +9,6 @@ import { getPeople } from 'modules/people';
 import { asyncConnect } from 'redux-connect';
 import { IPeople } from 'models/people';
 import { connect } from 'react-redux';
-import WebSocketNode from 'ws';
-
-const WebSocket = (window as any).WebSocket || WebSocketNode;
-
 // import * as moment from 'moment';
 import { emojisAction, addEmojiAction } from 'redux/modules/emojis';
 
@@ -56,8 +52,9 @@ class About extends React.Component<IProps, any> {
   private socket;
 
   public componentWillMount() {
-    // Don't run serverside
-    if (WebSocket) {
+    console.log('running component will mount code');
+    // NOTE: won't run serverside
+    if (typeof WebSocket !== 'undefined') {
       // Create WebSocket connection.
       this.socket = new WebSocket('ws://localhost:8889/api/track');
 
