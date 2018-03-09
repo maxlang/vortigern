@@ -32,10 +32,11 @@ const bodyParser = require('body-parser');
 
 // proxy middleware options
 const proxyOptions = {
-  target: 'localhost:8898', // target host
+  target: 'http://localhost:8898', // target host
   changeOrigin: true,               // needed for virtual hosted sites
   ws: true,                         // proxy websockets
   pathRewrite: {
+    '^/api': '/', // TODO: why doesn't prependPath:false work?
       // '^/api/old-path' : '/api/new-path',     // rewrite path
       // '^/api/remove/path' : '/path'           // remove base path
   },
@@ -44,6 +45,7 @@ const proxyOptions = {
       // override target 'http://www.example.org' to 'http://localhost:8000'
       // 'dev.localhost:3000' : 'http://localhost:8000'
   },
+  // prependPath: false,
 };
 
 const apiProxy = proxy(proxyOptions);
