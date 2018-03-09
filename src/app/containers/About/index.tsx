@@ -168,14 +168,25 @@ class About extends React.Component<IProps, any> {
         ),
       );
 
+    const attribution = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,' +
+      ' <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,' +
+      ' Imagery © <a href="http://mapbox.com">Mapbox</a>';
+
+    // tslint:disable-next-line:max-line-length
+    // const lighturl = 'https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+    const darkurl = 'https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+
     return (
       <div className={style.About}>
         <h4>About</h4>
         {/* <People/> */}
         <Map bounds={bounds} className={style.blah}>
           <TileLayer
-             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
+             url={darkurl}
+             attribution={attribution}
+             maxZoom={18}
+             id={'mapbox.streets'}
+             accessToken="pk.eyJ1IjoibWF4bGFuZyIsImEiOiJjamVrYXowdW0wZ3lqMzRsbDFuYWV5ejF2In0.wJcolR8UNs0SvJdPgwitsg"
            />
            {_.flatten(_.map(people.people, (person, i) => this.createPersonMarkers(person, i)))}
            {emojiMarkers}

@@ -6,3 +6,4 @@
  */
 
  require('../../node_modules/leaflet/dist/leaflet.css');
+ import 'rc-slider/assets/index.css';

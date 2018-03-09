@@ -1,0 +1,37 @@
+.Video {
+  background-color: black;
+}
+
+h1, h2, p {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+/* https://colorlib.com/wp/size-of-the-instagram-picture/ */
+
+/* Square Image: 1080px in width by 1080px in height
+Vertical Image:  1080px in width by 1350px in height
+Horizontal Image: 1080px in width by 566px in height */
+
+.blah {
+  /* position: absolute; */
+  height: 1350px;
+  width: 1080px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.bigIcon {
+  font-size: 40px;
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
