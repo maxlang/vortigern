@@ -32,7 +32,7 @@ const bodyParser = require('body-parser');
 
 // proxy middleware options
 const proxyOptions = {
-  target: 'http://localhost:8898', // target host
+  target: 'localhost:8898', // target host
   changeOrigin: true,               // needed for virtual hosted sites
   ws: true,                         // proxy websockets
   pathRewrite: {
@@ -49,6 +49,7 @@ const proxyOptions = {
 };
 
 const apiProxy = proxy(proxyOptions);
+app.use('/api', apiProxy);
 
 app.use(compression());
 
@@ -79,8 +80,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
-
-app.use('/api', apiProxy);
 
 app.get('*', (req, res) => {
   const location = req.url;
