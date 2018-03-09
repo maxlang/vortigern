@@ -9,9 +9,12 @@ import { getPeople } from 'modules/people';
 import { asyncConnect } from 'redux-connect';
 import { IPeople } from 'models/people';
 import { connect } from 'react-redux';
+import WebSocketNode from 'ws';
+
+const WebSocket = (window as any).WebSocket || WebSocketNode;
 
 // import * as moment from 'moment';
-import { emojisAction } from 'redux/modules/emojis';
+import { emojisAction, addEmojiAction } from 'redux/modules/emojis';
 
 const emojiTree = require('emoji-tree');
 
@@ -21,6 +24,7 @@ interface IProps {
   getPeople: typeof getPeople;
   emojisAction: typeof emojisAction;
   emojis: any;
+  addEmojiAction: typeof addEmojiAction;
 }
 
 @asyncConnect([{
@@ -52,13 +56,18 @@ class About extends React.Component<IProps, any> {
   private socket;
 
   public componentWillMount() {
-    // Create WebSocket connection.
-    this.socket = new WebSocket('wss://test.xlang.com/api/track');
+    // Don't run serverside
+    if (WebSocket) {
+      // Create WebSocket connection.
+      this.socket = new WebSocket('ws://localhost:8889/api/track');
 
-    // Listen for messages
-    this.socket.addEventListener('message', (event) => {
-        console.log('Message from server ', JSON.parse(event.data));
-    });
+      // Listen for messages
+      this.socket.addEventListener('message', (event) => {
+        console.log('WEB SOCKET GOT DATA!!!');
+        const data = _.filter(JSON.parse(event.data), {_index: 'emojis'});
+        this.props.addEmojiAction(data);
+      });
+    }
   }
 
   public componentWillUnmount() {
@@ -184,6 +193,7 @@ const AboutConnected = connect(
   {
     getPeople,
     emojisAction,
+    addEmojiAction,
   },
 )(About);
 

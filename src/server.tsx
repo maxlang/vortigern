@@ -19,6 +19,7 @@ import { configureStore } from './app/redux/store';
 import routes from './app/routes';
 
 import { Html } from './app/containers';
+// import WebSocket from 'ws';
 const manifest = require('../build/manifest.json');
 
 const path = require('path');
@@ -110,7 +111,7 @@ app.get('*', (req, res) => {
     });
 });
 
-app.listen(appConfig.port, appConfig.host, (err) => {
+const server = app.listen(appConfig.port, appConfig.host, (err) => {
   if (err) {
     console.error(Chalk.bgRed(err));
   } else {
@@ -127,3 +128,6 @@ function renderHTML(markup: string, store: any) {
 
   return `<!doctype html> ${html}`;
 }
+
+// https://github.com/chimurai/http-proxy-middleware#external-websocket-upgrade
+server.on('upgrade', apiProxy.upgrade);  // <-- subscribe to http 'upgrade'
