@@ -32,7 +32,7 @@ const bodyParser = require('body-parser');
 
 // proxy middleware options
 const proxyOptions = {
-  target: 'localhost:8898', // target host
+  target: 'http://localhost:8898', // target host
   changeOrigin: true,               // needed for virtual hosted sites
   ws: true,                         // proxy websockets
   pathRewrite: {
