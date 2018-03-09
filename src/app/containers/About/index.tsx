@@ -56,7 +56,7 @@ class About extends React.Component<IProps, any> {
     // NOTE: won't run serverside
     if (typeof WebSocket !== 'undefined') {
       // Create WebSocket connection.
-      this.socket = new WebSocket('ws://localhost:8889/api/track');
+      this.socket = new WebSocket('wss://test.xlang.com/api/track');
 
       // Listen for messages
       this.socket.addEventListener('message', (event) => {
