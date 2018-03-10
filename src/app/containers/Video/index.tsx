@@ -202,8 +202,10 @@ class Video extends React.Component<IProps, IVideoState> {
     // tslint:disable-next-line:max-line-length
     // const lighturl = 'https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
     // const darkurl = 'https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
-    // NOTE: max zoom 17 for stamen, max zoom 18 for mapbox
-    const url = 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}@2x.png';
+    // NOTE: max zoom 16? for stamen @2x, max zoom 18 for mapbox
+    // const url = 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}@2x.png';
+    const maxZoom = 18;
+    const url = 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}.png';
 
     // const setSlider = (v) => this.setSlider(v);
     const play = () => this.play();
@@ -240,7 +242,7 @@ class Video extends React.Component<IProps, IVideoState> {
           <TileLayer
              url={url}
              attribution={attribution}
-             maxZoom={17}
+             maxZoom={maxZoom}
              id={'mapbox.streets'}
              accessToken="pk.eyJ1IjoibWF4bGFuZyIsImEiOiJjamVrYXowdW0wZ3lqMzRsbDFuYWV5ejF2In0.wJcolR8UNs0SvJdPgwitsg"
              onLoad={delayedplay}
