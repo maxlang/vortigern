@@ -29,12 +29,23 @@ interface IProps {
 //   },
 // },
 // ])
-class Video extends React.Component<IProps, {time: number, prevTime: number, playing: boolean}> {
+
+interface IVideoState {
+  time: number;
+  prevTime: number;
+  playing: boolean;
+  duration: number;
+  fps: number;
+}
+
+class Video extends React.Component<IProps, IVideoState> {
 
   public state = {
     prevTime: null,
     time: null,
     playing: false,
+    duration: 10 * 1000, // default duration is 10s
+    fps: 25, // default fps is 25
   };
 
   public componentWillMount() {
@@ -42,12 +53,19 @@ class Video extends React.Component<IProps, {time: number, prevTime: number, pla
     this.props.location.query.start && moment(this.props.location.query.start) || moment().subtract(1, 'day'),
     this.props.location.query.end && moment(this.props.location.query.end));
     console.log('this.props', this.props.location.query);
+
+    if (this.props.location.query.duration) {
+      this.setState({duration: _.toNumber(this.props.location.query.duration)});
+    }
+    if (this.props.location.query.fps) {
+      this.setState({fps: _.toNumber(this.props.location.query.fps)});
+    }
   }
 
   public componentWillReceiveProps(props) {
     if (props.locations && !this.state.time) {
       this.setSlider(this.getTimeRange(props).start);
-      this.play(props);
+      // this.play(props);
     }
   }
 
@@ -102,18 +120,24 @@ class Video extends React.Component<IProps, {time: number, prevTime: number, pla
   }
 
   private play(props = this.props) {
+    if (this.state.playing) {
+      return;
+    }
+    const fps = this.state.fps;
+
     const times = this.getTimeRange(props);
     this.setState({playing: true, time: times.start, prevTime: null});
-    const timeIncrement = (times.end - times.start) / 30 / 10;
+    const timeIncrement = (times.end - times.start) / (this.state.duration / 1000) / fps;
     // 30 seconds
     const interval = setInterval(() => {
       const newTime = Math.min(this.state.time + timeIncrement, times.end);
       if (newTime === times.end) {
         clearInterval(interval);
+        this.setState({playing: false});
       }
       this.setState({prevTime: this.state.time, time: newTime});
      }
-    , 100);
+    , 1000 / fps);
   }
 
   private getEmojis(timestamp: number) {
@@ -169,16 +193,19 @@ class Video extends React.Component<IProps, {time: number, prevTime: number, pla
         ),
       );
 
-    const attribution = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,' +
-      ' <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,' +
-      ' Imagery © <a href="http://mapbox.com">Mapbox</a>';
+    // const attribution = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,' +
+    //   ' <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,' +
+    //   ' Imagery © <a href="http://mapbox.com">Mapbox</a>';
+
+    const attribution = 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.';
 
     // tslint:disable-next-line:max-line-length
     // const lighturl = 'https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
-    const darkurl = 'https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+    // const darkurl = 'https://api.mapbox.com/styles/v1/mapbox/dark-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}';
+    const url = 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}@2x.png';
 
     // const setSlider = (v) => this.setSlider(v);
-    // const play = () => this.play();
+    const play = () => this.play();
     console.log('time', this.state.time);
 
     const location = this.getPositionAtTime(this.state.time);
@@ -201,17 +228,20 @@ class Video extends React.Component<IProps, {time: number, prevTime: number, pla
 
     // const playButton = <a style={{color: 'blue'}} href={null} onClick={play}>play</a>;
 
+    // const clock = <time className={style.clock}>{moment(this.state.time).format('MMMM Do YYYY, h:mm:ss a')}</time>;
+    const clockTime = moment(this.state.time).format('MMMM Do YYYY, h:mm:ss a');
+
     return (
       <div className={style.Video}>
-
-        <time className={style.clock}>{moment(this.state.time).format('MMMM Do YYYY, h:mm:ss a')}</time>
+        {this.state.playing ? <time className={style.clock}>{clockTime}</time> : null}
         <Map bounds={bounds} className={style.blah} zoomControl={false}>
           <TileLayer
-             url={darkurl}
+             url={url}
              attribution={attribution}
              maxZoom={18}
              id={'mapbox.streets'}
              accessToken="pk.eyJ1IjoibWF4bGFuZyIsImEiOiJjamVrYXowdW0wZ3lqMzRsbDFuYWV5ejF2In0.wJcolR8UNs0SvJdPgwitsg"
+             onLoad={play}
            />
           {marker}
           {emojiMarkers}

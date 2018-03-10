@@ -179,6 +179,8 @@ class About extends React.Component<IProps, any> {
     // const attribution = '&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors'
     const attribution = 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.';
     // const url = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+    // TODO:  @2x errors out at high zooms with toner-lite ... :(
     return (
       <div className={style.About}>
         <h4>About</h4>

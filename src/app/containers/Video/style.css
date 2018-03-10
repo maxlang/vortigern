@@ -55,13 +55,15 @@ body {
   position: absolute;
   z-index: 1000;
   color: red;
-  font-weight: lighter;
+  /* font-weight: lighter; */
+  font-weight: bold;
   font-family: Helvetica;
   font-size: 50px;
   /* text-shadow: 1px 1px 5px black; */
-  -webkit-text-fill-color: white; /* Will override color (regardless of order) */
-  -webkit-text-stroke-width: 1px;
-  -webkit-text-stroke-color: black;
+  /* https://css-tricks.com/adding-stroke-to-web-text/ */
+  -webkit-text-fill-color: black; /* Will override color (regardless of order) */
+  -webkit-text-stroke-width: 2px;
+  -webkit-text-stroke-color: white;
 }
 
 div.slider {
