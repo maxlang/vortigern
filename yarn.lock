@@ -2655,6 +2655,10 @@ emoji-tree@^1.1.1:
   dependencies:
     lodash "^4.16.6"
 
+emoji-unicode@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/emoji-unicode/-/emoji-unicode-1.0.9.tgz#f05fd13908bc683478f1557e44ca739b8be4a411"
+
 emojis-list@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/emojis-list/-/emojis-list-2.1.0.tgz#4daa4d9db00f9819880c79fa457ae5b09a1fd389"
@@ -5351,6 +5355,10 @@ normalize-url@^1.4.0:
     prepend-http "^1.0.0"
     query-string "^4.1.0"
     sort-keys "^1.0.0"
+
+"noto-emoji@https://github.com/googlei18n/noto-emoji":
+  version "0.0.0"
+  resolved "https://github.com/googlei18n/noto-emoji#153e1d4c026c124fbac6ee93e559b5df375f24f5"
 
 npm-run-path@^1.0.0:
   version "1.0.0"
