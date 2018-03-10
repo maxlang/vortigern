@@ -14,9 +14,22 @@ Vertical Image:  1080px in width by 1350px in height
 Horizontal Image: 1080px in width by 566px in height */
 
 .blah {
-  /* position: absolute; */
-  height: 1350px;
-  width: 1080px;
+  position: absolute;
+  /* height: 1350px; */
+  /* width: 1080px; */
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.blah {
+  position: absolute;
+  /* height: 1350px; */
+  /* width: 1080px; */
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
   border: none;
@@ -34,4 +47,47 @@ body {
   margin: 0;
   padding: 0;
   border: none;
+}
+
+.clock {
+  left: 20px;
+  top: 20px;
+  position: absolute;
+  z-index: 1000;
+  color: red;
+  font-weight: lighter;
+  font-family: Helvetica;
+  font-size: 50px;
+  /* text-shadow: 1px 1px 5px black; */
+  -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+}
+
+div.slider {
+  padding: 20px 0;
+  margin: 0 20px;
+  width: 1000px;
+}
+
+@keyframes zoomin {
+  0% {
+    /* transform: scale(3); */
+    opacity: 0;
+  }
+  100% {
+    /* transform: scale(1); */
+    opacity: 1;
+  }
+}
+
+.animated-marker {
+  animation-name: zoomin;
+  animation-duration: .3s;
+  animation-timing-function: ease-out;
+  animation-delay: 0s;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: none;
+  animation-play-state: running;
 }

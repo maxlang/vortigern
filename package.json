@@ -136,6 +136,7 @@
   },
   "dependencies": {
     "@google/maps": "^0.4.5",
+    "@jwaterfaucett/react-analog-clock-component": "^0.0.2",
     "@types/geolib": "^2.0.23",
     "@types/lodash": "^4.14.104",
     "babel-polyfill": "^6.26.0",
