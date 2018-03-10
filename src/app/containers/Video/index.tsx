@@ -13,6 +13,11 @@ import { getUserLocations } from 'redux/modules/persontimelapse/index';
 // const emojiTree = require('emoji-tree');
 // import Clock from './clock';
 import * as geolib from 'geolib';
+const emojiUnicode = require('emoji-unicode');
+
+function getEmoji(emoji) {
+  return require(`../../../../node_modules/noto-emoji/svg/emoji_u${emojiUnicode(emoji)}.svg`);
+}
 
 interface IProps {
   getUserLocations: typeof getUserLocations;
@@ -184,11 +189,13 @@ class Video extends React.Component<IProps, IVideoState> {
     // const emojiSpanClass = '';
     // const getEmojiHtml = (e) => `<span class="${emojiSpanClass}">${e._source.emoji}</span>`;
 
+    const getMarkerHtml = (emoji) => `<img src=${getEmoji(emoji)} width="30" />`;
+
     const emojiMarkers = _.map(this.getEmojis(this.state.time),
       (e) => (
         <Marker
           position={[e._source.point.lat, e._source.point.lon]}
-          icon={divIcon({html: e._source.emoji, className: emojiClass, iconAnchor: [20, 30]})}
+          icon={divIcon({html: getMarkerHtml(e._source.emoji), className: emojiClass, iconAnchor: [20, 30]})}
           key={e._id} />
         ),
       );
@@ -214,10 +221,11 @@ class Video extends React.Component<IProps, IVideoState> {
 
     const location = this.getPositionAtTime(this.state.time);
 
+    const iconHtml = `<img src=${getEmoji('😁')} width="30" />`;
     const marker = location ? (
       <Marker
         position={[location.latitude, location.longitude]}
-        icon={divIcon({html: '😁', className: style.bigIcon, iconAnchor: [20, 30]})}
+        icon={divIcon({html: iconHtml, className: style.bigIcon, iconAnchor: [20, 30]})}
         />
       ) : null;
 
