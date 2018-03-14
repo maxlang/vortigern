@@ -57,10 +57,24 @@ class Video extends React.Component<IProps, IVideoState> {
     headless: false,
   };
 
+  public start: moment.Moment;
+  public end: moment.Moment;
+  public forceStart: boolean;
+  public forceEnd: boolean;
+
   public componentWillMount() {
-    this.props.getUserLocations('maxwell.g.lang@gmail.com',
-    this.props.location.query.start && moment(this.props.location.query.start) || moment().subtract(1, 'day'),
-    this.props.location.query.end && moment(this.props.location.query.end));
+    const start = this.props.location.query.start;
+    const end = this.props.location.query.end;
+
+    // TODO: this logic should only live in one place - currently also live on server
+    if (!start && !end) {
+      this.start = moment().subtract(1, 'day');
+      this.end = moment();
+    } else {
+      this.start = start ? moment(start) : moment(end).subtract(1, 'day');
+      this.end = end ? moment(end) : moment(start).add(1, 'day');
+    }
+    this.props.getUserLocations('maxwell.g.lang@gmail.com', this.start.toISOString(), this.end.toISOString());
     console.log('this.props', this.props.location.query);
 
     if (this.props.location.query.duration) {
@@ -73,6 +87,15 @@ class Video extends React.Component<IProps, IVideoState> {
       this.props.location.query.headless.toLowerCase() === 'true') {
       (window as any).__VIDEO_ADVANCE__ = () => this.advance();
       this.setState({autoplay: false, headless: true});
+    }
+
+    if (this.props.location.query.forceStart &&
+      this.props.location.query.forceStart.toLowerCase() === 'true') {
+      this.forceStart = true;
+    }
+    if (this.props.location.query.forceEnd &&
+      this.props.location.query.forceEnd.toLowerCase() === 'true') {
+      this.forceEnd = true;
     }
   }
 
@@ -87,8 +110,12 @@ class Video extends React.Component<IProps, IVideoState> {
   public getTimeRange(props = this.props) {
     const userLocations = _.filter(props.locations, {_index: 'locations'});
     if (userLocations.length >= 2) {
-      const start = _.minBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
-      const end = _.maxBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
+      const start = this.forceStart ?
+        this.start.valueOf() :
+        _.minBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
+      const end = this.forceEnd ?
+        this.end.valueOf() :
+        _.maxBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
       return {start, end};
     }
     return null;
@@ -154,10 +181,9 @@ class Video extends React.Component<IProps, IVideoState> {
       const newTime = Math.min(this.state.time + timeIncrement, times.end);
       if (curTime === times.end) {
         clearInterval(interval);
-        this.setState({playing: false, time: null, prevTime: null});
-      } else {
-        this.setState({prevTime: this.state.time, time: newTime});
+        this.setState({playing: false});
       }
+      this.setState({prevTime: this.state.time, time: newTime});
      }
     , 1000 / fps);
   }
@@ -267,7 +293,7 @@ class Video extends React.Component<IProps, IVideoState> {
     // const setSlider = (v) => this.setSlider(v);
     const play = () => this.play();
     const delayedplay = this.state.headless ?
-      () => (window as any).__VIDEO_READY__ = true :
+      () => (window as any).__VIDEO_READY__ = this.getTimeRange() :
       () => setTimeout(play, 1000);
     console.log('time', this.state.time);
 
