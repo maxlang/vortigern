@@ -139,6 +139,16 @@ class Video extends React.Component<IProps, IVideoState> {
     const nextLocationIdx = _.sortedIndexBy(sortedUserLocations, {_source: {timestamp}}, (l) => l._source.timestamp);
     const prevLocationIdx = nextLocationIdx - 1;
 
+    // TODO: might be an off by one issue here
+
+    // If it's the first location, just return it
+    if (nextLocationIdx === 0) {
+      return {
+        latitude: sortedUserLocations[nextLocationIdx]._source.latitude,
+        longitude: sortedUserLocations[nextLocationIdx]._source.longitude,
+      };
+    }
+
     // If it's before or after tracking, return null;
     if (prevLocationIdx < 0 || nextLocationIdx >= sortedUserLocations.length) {
       return null;
@@ -311,6 +321,11 @@ class Video extends React.Component<IProps, IVideoState> {
         />
       ) : null;
 
+    if (!location) {
+      (window as any).__MARKER_READY__ = true;
+    } else {
+      (window as any).__MARKER_READY__ = false;
+    }
     // const slider = (
     //   <Slider
     //     className={style.slider}
