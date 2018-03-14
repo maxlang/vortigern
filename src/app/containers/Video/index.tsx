@@ -41,6 +41,8 @@ interface IVideoState {
   playing: boolean;
   duration: number;
   fps: number;
+  autoplay: boolean;
+  headless: boolean;
 }
 
 class Video extends React.Component<IProps, IVideoState> {
@@ -51,6 +53,8 @@ class Video extends React.Component<IProps, IVideoState> {
     playing: false,
     duration: 10 * 1000, // default duration is 10s
     fps: 25, // default fps is 25
+    autoplay: true,
+    headless: false,
   };
 
   public componentWillMount() {
@@ -65,24 +69,32 @@ class Video extends React.Component<IProps, IVideoState> {
     if (this.props.location.query.fps) {
       this.setState({fps: _.toNumber(this.props.location.query.fps)});
     }
+    if (this.props.location.query.headless &&
+      this.props.location.query.headless.toLowerCase() === 'true') {
+      (window as any).__VIDEO_ADVANCE__ = () => this.advance();
+      this.setState({autoplay: false, headless: true});
+    }
   }
 
   public componentWillReceiveProps(props) {
-    if (props.locations && !this.state.time) {
+    if (props.locations && props.locations.length && !this.state.time && this.getTimeRange(props)) {
       this.setSlider(this.getTimeRange(props).start);
       // this.play(props);
     }
   }
 
   // TODO: add timerange and bounds to state
-  private getTimeRange(props = this.props) {
+  public getTimeRange(props = this.props) {
     const userLocations = _.filter(props.locations, {_index: 'locations'});
-    const start = _.minBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
-    const end = _.maxBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
-    return {start, end};
+    if (userLocations.length >= 2) {
+      const start = _.minBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
+      const end = _.maxBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
+      return {start, end};
+    }
+    return null;
   }
 
-  private getBounds() {
+  public getBounds() {
     const minLat = _.minBy(this.props.locations, (l) => l._source.latitude)._source.latitude;
     const maxLat = _.maxBy(this.props.locations, (l) => l._source.latitude)._source.latitude;
     const minLon = _.minBy(this.props.locations, (l) => l._source.longitude)._source.longitude;
@@ -91,7 +103,7 @@ class Video extends React.Component<IProps, IVideoState> {
     return [[minLat, minLon], [maxLat, maxLon]];
   }
 
-  private getPositionAtTime(timestamp: number) {
+  public getPositionAtTime(timestamp: number) {
     // console.log('unsorted', this.props.locations);
     const sortedUserLocations = _.orderBy(_.filter(this.props.locations, {_index: 'locations'}),
       [(l) => l._source.timestamp, (l) => l._source.recorded], ['asc', 'asc']);
@@ -120,32 +132,70 @@ class Video extends React.Component<IProps, IVideoState> {
     return location;
   }
 
-  private setSlider(timestamp) {
+  public setSlider(timestamp) {
     this.setState({prevTime: this.state.time, time: timestamp});
   }
 
-  private play(props = this.props) {
-    if (this.state.playing) {
+  public play(props = this.props) {
+    if (!this.state.autoplay || this.state.playing) {
       return;
     }
     const fps = this.state.fps;
 
     const times = this.getTimeRange(props);
+    if (!times) {
+      return;
+    }
     this.setState({playing: true, time: times.start, prevTime: null});
     const timeIncrement = (times.end - times.start) / (this.state.duration / 1000) / fps;
     // 30 seconds
     const interval = setInterval(() => {
+      const curTime = this.state.time;
       const newTime = Math.min(this.state.time + timeIncrement, times.end);
-      if (newTime === times.end) {
+      if (curTime === times.end) {
         clearInterval(interval);
-        this.setState({playing: false});
+        this.setState({playing: false, time: null, prevTime: null});
+      } else {
+        this.setState({prevTime: this.state.time, time: newTime});
       }
-      this.setState({prevTime: this.state.time, time: newTime});
      }
     , 1000 / fps);
   }
 
-  private getEmojis(timestamp: number) {
+  public advance() {
+    const fps = this.state.fps;
+    const times = this.getTimeRange(this.props);
+    if (!times) {
+      return null;
+    }
+
+    const totalFrames = (this.state.duration / 1000) * fps;
+
+    if (totalFrames <= 1) {
+      console.warn(`Advance won't work correctly if total frames is <= 1. Current total frames is: ${totalFrames}`);
+    }
+
+    const timeIncrement = (times.end - times.start) / (totalFrames - 1);
+    if (!this.state.time || !this.state.playing) {
+      this.setState({playing: true, time: times.start, prevTime: null});
+      console.log(`current frame: ${1}/${totalFrames}`);
+    } else {
+      const curTime = this.state.time;
+      const newTime = Math.min(Math.ceil(this.state.time + timeIncrement), times.end);
+      const currentFrame = Math.round((newTime - times.start) / timeIncrement) + 1;
+      console.log(`current frame: ${currentFrame}/${totalFrames}`);
+
+      if (curTime === times.end) {
+        this.setState({playing: false, time: null, prevTime: null});
+        return null;
+      }
+      this.setState({playing: true, prevTime: this.state.time, time: newTime});
+    }
+
+    return this.state.time;
+  }
+
+  public getEmojis(timestamp: number) {
     const emojiLocations = _.filter(this.props.locations,
       (l) => l._index === 'emojis' && l._source.timestamp < timestamp);
     return emojiLocations;
@@ -216,7 +266,9 @@ class Video extends React.Component<IProps, IVideoState> {
 
     // const setSlider = (v) => this.setSlider(v);
     const play = () => this.play();
-    const delayedplay = () => setTimeout(play, 1000);
+    const delayedplay = this.state.headless ?
+      () => (window as any).__VIDEO_READY__ = true :
+      () => setTimeout(play, 1000);
     console.log('time', this.state.time);
 
     const location = this.getPositionAtTime(this.state.time);

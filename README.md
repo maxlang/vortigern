@@ -8,6 +8,18 @@ curl -X PUT localhost:9200/emojis -d '{"mappings":{"location":{"properties":{"us
 
 https://github.com/Automattic/node-canvas/issues/958
 
+emojis on linux:
+Currently using:
+- https://www.npmjs.com/package/emoji-unicode to get the code
+- https://github.com/googlei18n/noto-emoji/tree/master/svg for the emoji svgs
+
+See also:
+https://github.com/eosrei/twemoji-color-font#install-on-linux
+https://github.com/emojione/emojify.js
+emojione
+could maybe even get images from emojipedia, for example: https://emojipedia.org/apple/ios-11.2/ - just dl all pngs
+https://blog.mapbox.com/emoji-map-markers-9d1452bc856a
+
 # Vortigern
 [![Build Status](https://travis-ci.org/barbar/vortigern.svg?branch=master)](https://travis-ci.org/barbar/vortigern)
 [![Dependency Status](https://david-dm.org/barbar/vortigern.svg)]()
