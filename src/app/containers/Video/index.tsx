@@ -59,8 +59,8 @@ class Video extends React.Component<IProps, IVideoState> {
 
   public start: moment.Moment;
   public end: moment.Moment;
-  public forceStart: boolean;
-  public forceEnd: boolean;
+  public forceStart: number;
+  public forceEnd: number;
 
   public componentWillMount() {
     const start = this.props.location.query.start;
@@ -71,8 +71,11 @@ class Video extends React.Component<IProps, IVideoState> {
       this.start = moment().subtract(1, 'day');
       this.end = moment();
     } else {
+      // HACK: use consistent datetime format
       this.start = start ? moment(start) : moment(end).subtract(1, 'day');
+      this.start = this.start.isValid() ? this.start : moment(_.toNumber(start));
       this.end = end ? moment(end) : moment(start).add(1, 'day');
+      this.end = this.end.isValid() ? this.end : moment(_.toNumber(end));
     }
     this.props.getUserLocations('maxwell.g.lang@gmail.com', this.start.toISOString(), this.end.toISOString());
     console.log('this.props', this.props.location.query);
@@ -89,13 +92,11 @@ class Video extends React.Component<IProps, IVideoState> {
       this.setState({autoplay: false, headless: true});
     }
 
-    if (this.props.location.query.forceStart &&
-      this.props.location.query.forceStart.toLowerCase() === 'true') {
-      this.forceStart = true;
+    if (this.props.location.query.forceStart) {
+      this.forceStart = _.toNumber(this.props.location.query.forceStart);
     }
-    if (this.props.location.query.forceEnd &&
-      this.props.location.query.forceEnd.toLowerCase() === 'true') {
-      this.forceEnd = true;
+    if (this.props.location.query.forceEnd) {
+      this.forceEnd = _.toNumber(this.props.location.query.forceEnd);
     }
   }
 
@@ -111,10 +112,10 @@ class Video extends React.Component<IProps, IVideoState> {
     const userLocations = _.filter(props.locations, {_index: 'locations'});
     if (userLocations.length >= 2) {
       const start = this.forceStart ?
-        this.start.valueOf() :
+        this.forceStart :
         _.minBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
       const end = this.forceEnd ?
-        this.end.valueOf() :
+        this.forceEnd :
         _.maxBy(userLocations, (l) => l._source.timestamp)._source.timestamp;
       return {start, end};
     }
@@ -265,7 +266,10 @@ class Video extends React.Component<IProps, IVideoState> {
     // const emojiSpanClass = '';
     // const getEmojiHtml = (e) => `<span class="${emojiSpanClass}">${e._source.emoji}</span>`;
 
-    const getMarkerHtml = (emoji) => `<img src=${getEmoji(emoji)} width="30" />`;
+    // TODO: check for each marker
+    const getMarkerHtml = (emoji) => `<img src=${
+      getEmoji(emoji)
+    } width="30" onload="javascript:window.__MARKER_READY__ = true" />`;
 
     const emojiMarkers = _.map(this.getEmojis(this.state.time),
       (e) => (
@@ -299,7 +303,7 @@ class Video extends React.Component<IProps, IVideoState> {
 
     const location = this.getPositionAtTime(this.state.time);
 
-    const iconHtml = `<img src=${getEmoji('😁')} width="30" />`;
+    const iconHtml = getMarkerHtml('😁');
     const marker = location ? (
       <Marker
         position={[location.latitude, location.longitude]}
