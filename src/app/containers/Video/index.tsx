@@ -7,7 +7,7 @@ import { divIcon } from 'leaflet-headless';
 // import { PeopleConnected as People } from './people';
 // import { asyncConnect } from 'redux-connect';
 import { connect } from 'react-redux';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 import { getUserLocations } from 'redux/modules/persontimelapse/index';
 // import Slider from 'rc-slider';
 // const emojiTree = require('emoji-tree');
@@ -99,6 +99,9 @@ class Video extends React.Component<IProps, IVideoState> {
     }
     if (this.props.location.query.forceEnd) {
       this.forceEnd = _.toNumber(this.props.location.query.forceEnd);
+    }
+    if (this.props.location.query.tz) {
+      moment.tz.setDefault(this.props.location.query.tz);
     }
   }
 
