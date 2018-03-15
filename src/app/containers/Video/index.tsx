@@ -66,6 +66,7 @@ class Video extends React.Component<IProps, IVideoState> {
 
   public componentWillMount() {
     if (this.props.location.query.tz) {
+      console.log('setting tz', this.props.location.query.tz);
       moment.tz.setDefault(this.props.location.query.tz);
     }
 
@@ -80,9 +81,13 @@ class Video extends React.Component<IProps, IVideoState> {
       // HACK: use consistent datetime format
       this.start = start ? moment(start) : moment(end).subtract(1, 'day');
       this.start = this.start.isValid() ? this.start : moment(_.toNumber(start));
+
       this.end = end ? moment(end) : moment(start).add(1, 'day');
       this.end = this.end.isValid() ? this.end : moment(_.toNumber(end));
     }
+    console.log('start', this.start.toISOString());
+    console.log('end', this.end.toISOString());
+
     this.props.getUserLocations('maxwell.g.lang@gmail.com', this.start.toISOString(), this.end.toISOString());
     console.log('this.props', this.props.location.query);
 
