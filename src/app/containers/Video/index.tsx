@@ -65,6 +65,10 @@ class Video extends React.Component<IProps, IVideoState> {
   // private oldEmojis: any[];
 
   public componentWillMount() {
+    if (this.props.location.query.tz) {
+      moment.tz.setDefault(this.props.location.query.tz);
+    }
+
     const start = this.props.location.query.start;
     const end = this.props.location.query.end;
 
@@ -99,9 +103,6 @@ class Video extends React.Component<IProps, IVideoState> {
     }
     if (this.props.location.query.forceEnd) {
       this.forceEnd = _.toNumber(this.props.location.query.forceEnd);
-    }
-    if (this.props.location.query.tz) {
-      moment.tz.setDefault(this.props.location.query.tz);
     }
   }
 
