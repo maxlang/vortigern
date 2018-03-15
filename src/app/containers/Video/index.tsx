@@ -62,6 +62,8 @@ class Video extends React.Component<IProps, IVideoState> {
   public forceStart: number;
   public forceEnd: number;
 
+  // private oldEmojis: any[];
+
   public componentWillMount() {
     const start = this.props.location.query.start;
     const end = this.props.location.query.end;
@@ -279,9 +281,19 @@ class Video extends React.Component<IProps, IVideoState> {
     // TODO: check for each marker
     const getMarkerHtml = (emoji) => `<img src=${
       getEmoji(emoji)
-    } width="30" onload="javascript:window.__MARKER_READY__ = true" />`;
+    } width="30" onload="javascript:console.log('marker loaded'); window.__MARKERS_LEFT__ -= 1;" />`;
 
-    const emojiMarkers = _.map(this.getEmojis(this.state.time),
+    const emojis = this.getEmojis(this.state.time);
+
+    // const emojiCodes =
+      // _(emojis).map((e) => e._source.emoji).thru((v) => v.concat('😁')).map(getEmoji).uniq().value();
+
+    // const newEmojis = this.oldEmojis ? emojis.length - this.oldEmojis.length : emojis.length;
+    (window as any).__MARKERS_LEFT__ = emojis.length;
+
+    // this.oldEmojis = emojis;
+
+    const emojiMarkers = _.map(emojis,
       (e) => (
         <Marker
           position={[e._source.point.lat, e._source.point.lon]}
@@ -321,10 +333,9 @@ class Video extends React.Component<IProps, IVideoState> {
         />
       ) : null;
 
-    if (!location) {
-      (window as any).__MARKER_READY__ = true;
-    } else {
-      (window as any).__MARKER_READY__ = false;
+    // TODO: is this image always reloaded? what if location stays exactly the same?
+    if (location) {
+      (window as any).__MARKERS_LEFT__ += 1;
     }
     // const slider = (
     //   <Slider
