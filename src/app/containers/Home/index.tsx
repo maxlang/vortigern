@@ -19,14 +19,14 @@ class Home extends React.Component<any, any> {
     e.preventDefault(); // Stop form submit
     this.fileUpload(this.state.file).then((response) => {
       console.log(response);
-      this.setState({image: `http://localhost:8898/file/${response.file.filename}`});
+      this.setState({image: `/api/file/${response.file.filename}`});
     });
   }
   public onChange(e) {
     this.setState({file: e.target.files[0]});
   }
   public fileUpload(file) {
-    const url = 'http://localhost:8898/upload';
+    const url = '/api/upload';
     const formData = new FormData();
     formData.append('file', file);
     // const headers = {
